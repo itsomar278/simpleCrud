@@ -1,7 +1,10 @@
 package com.NetflixClone.Task.NetflixClone.Controller;
 
+import com.NetflixClone.Task.NetflixClone.Controller.DTOs.UserDTO;
+import com.NetflixClone.Task.NetflixClone.Controller.Mapping.UserMapping;
 import com.NetflixClone.Task.NetflixClone.Model.User;
 import com.NetflixClone.Task.NetflixClone.Service.UserService;
+import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,61 +20,43 @@ public class UserController {
 
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers(){
-        List<User> users = userService.findAll();
-        if(users.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        else {
-            return new ResponseEntity<>(userService.findAll(), HttpStatus.OK);
-        }
+
+        return new ResponseEntity<>(userService.findAll(), HttpStatus.OK);
+
     }
 
     @GetMapping("/users/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id){
-        User user = userService.findById(id);
-        if(user == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        else {
+
             return new ResponseEntity<>(userService.findById(id), HttpStatus.OK);
-        }
+
     }
 
     @PostMapping("/users")
-    public ResponseEntity<String> saveUser(@RequestBody User user){
-        if(user == null || user.getFirstName().isEmpty() || user.getLastName().isEmpty() || user.getEmail().isEmpty() || user.getDateOfBirth() == null) {
-            return new ResponseEntity<>("FAILED TO CREATE " ,HttpStatus.BAD_REQUEST);
-        }
-        else {
-            userService.save(user);
+    public ResponseEntity<String> saveUser(@RequestBody UserDTO user){
+
+            userService.save(MapToUser(user));
             return new ResponseEntity<>("Created Succesfully", HttpStatus.CREATED);
-        }
+
     }
 
     @PutMapping("/users/{id}")
-    public ResponseEntity<String> updateUser(@RequestBody User user , @PathVariable Long id){
-        User olduser = userService.findById(id);
-        if(olduser == null) {
-            return new ResponseEntity<>("NO USER WITH SUCH ID" ,HttpStatus.NOT_FOUND);
-        }
-        if(user == null || user.getFirstName().isEmpty() || user.getLastName().isEmpty() || user.getEmail().isEmpty() || user.getDateOfBirth() == null) {
-            return new ResponseEntity<>("FAILED TO UPDATE PLEASE PROVIDE FULL USER DATA " ,HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<String> updateUser(@RequestBody UserDTO user , @PathVariable Long id){
 
-        userService.update(user , id);
+            userService.update(MapToUser(user) , id);
             return new ResponseEntity<>("Updated Succesfully", HttpStatus.OK);
 
     }
 
     @DeleteMapping("/users/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id){
-        User user = userService.findById(id);
-        if(user == null) {
-            return new ResponseEntity<>("NO USER WITH SUCH ID" ,HttpStatus.NOT_FOUND);
-        }
-        else {
+
             userService.deleteById(id);
             return new ResponseEntity<>("Deleted !!!!!", HttpStatus.OK);
-        }
+    }
+
+    public User MapToUser(UserDTO userDTO){
+        UserMapping INSTANCE = Mappers.getMapper(UserMapping.class);
+        return INSTANCE.oUser(userDTO);
     }
 }

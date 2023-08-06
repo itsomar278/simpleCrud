@@ -16,7 +16,7 @@ public class User {
     @Column(name = "last_name")
 
     String lastName; ;
-    @Column(name = "email")
+    @Column(name = "email" , unique=true)
     String email; ;
     @Column(name = "date_of_birth")
     Date dateOfBirth; ;
